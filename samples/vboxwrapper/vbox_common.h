@@ -152,6 +152,9 @@ public:
     // for optional remote desktop; dynamically assigned
     int rd_host_port;
     bool headless;
+   
+    std::streamoff p;
+    std:string state;
 
     int vm_pid;
     int vboxsvc_pid;
@@ -179,10 +182,12 @@ public:
     virtual int poweroff() = 0;
     virtual int pause() = 0;
     virtual int resume() = 0;
-	virtual int capture_screenshot() = 0;
+    virtual int capture_screenshot() = 0;
     virtual int create_snapshot(double elapsed_time) = 0;
     virtual int cleanup_snapshots(bool delete_active) = 0;
     virtual int restore_snapshot() = 0;
+
+    virtual void get_guest_vm();
 
     virtual int run(bool do_restore_snapshot);
     virtual void cleanup();

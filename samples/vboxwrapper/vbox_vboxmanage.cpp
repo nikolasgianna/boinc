@@ -879,7 +879,7 @@ int VBOX_VM::poll(bool log_state) {
     // What state is the VM in?
     //
 
-    command  = "showvminfo \"" + vm_name + "\" ";
+    /*command  = "showvminfo \"" + vm_name + "\" ";
     command += "--machinereadable ";
 
     if (vbm_popen(command, output, "VM state", false, false, 45, false) == 0) {
@@ -888,6 +888,10 @@ int VBOX_VM::poll(bool log_state) {
             vmstate_start += 9;
             vmstate_end = output.find("\"", vmstate_start);
             vmstate = output.substr(vmstate_start, vmstate_end - vmstate_start);
+    */
+
+    get_guest_vm();
+    vmstate = state;
 
             // VirtualBox Documentation suggests that that a VM is running when its
             // machine state is between MachineState_FirstOnline and MachineState_LastOnline
@@ -898,67 +902,67 @@ int VBOX_VM::poll(bool log_state) {
             //
             // So for now, go with what VboxManage is reporting.
             //
-            if (vmstate == "running") {
+            if (vmstate == "Running") {
                 online = true;
                 saving = false;
                 restoring = false;
                 suspended = false;
                 crashed = false;
-            } else if (vmstate == "paused") {
+            } else if (vmstate == "Paused") {
                 online = true;
                 saving = false;
                 restoring = false;
                 suspended = true;
                 crashed = false;
-            } else if (vmstate == "starting") {
+            } else if (vmstate == "Starting") {
                 online = true;
                 saving = false;
                 restoring = false;
                 suspended = false;
                 crashed = false;
-            } else if (vmstate == "stopping") {
+            } else if (vmstate == "Stopping") {
                 online = true;
                 saving = false;
                 restoring = false;
                 suspended = false;
                 crashed = false;
-            } else if (vmstate == "saving") {
+            } else if (vmstate == "Saving") {
                 online = true;
                 saving = true;
                 restoring = false;
                 suspended = false;
                 crashed = false;
-            } else if (vmstate == "restoring") {
+            } else if (vmstate == "Restoring") {
                 online = true;
                 saving = false;
                 restoring = true;
                 suspended = false;
                 crashed = false;
-            } else if (vmstate == "livesnapshotting") {
+            } else if (vmstate == "Livesnapshotting") {
                 online = true;
                 saving = false;
                 restoring = false;
                 suspended = false;
                 crashed = false;
-            } else if (vmstate == "deletingsnapshotlive") {
+            } else if (vmstate == "Deletingsnapshotlive") {
                 online = true;
                 saving = false;
                 restoring = false;
                 suspended = false;
                 crashed = false;
-            } else if (vmstate == "deletingsnapshotlivepaused") {
+            } else if (vmstate == "Deletingsnapshotlivepaused") {
                 online = true;
                 saving = false;
                 restoring = false;
                 suspended = false;
                 crashed = false;
-            } else if (vmstate == "aborted") {
+            } else if (vmstate == "Aborted") {
                 online = false;
                 saving = false;
                 restoring = false;
                 suspended = false;
                 crashed = true;
-            } else if (vmstate == "gurumeditation") {
+            } else if (vmstate == "Gurumeditation") {
                 online = false;
                 saving = false;
                 restoring = false;
@@ -980,19 +984,19 @@ int VBOX_VM::poll(bool log_state) {
             }
 
             retval = BOINC_SUCCESS;
-        }
-    }
+        //}
+    //}
 
     //
     // Grab a snapshot of the latest log file.  Avoids multiple queries across several
     // functions.
     //
-    get_vm_log(vm_log);
+    //get_vm_log(vm_log);
 
     //
     // Dump any new VM Guest Log entries
     //
-    dump_vmguestlog_entries();
+    //dump_vmguestlog_entries();
 
     return retval;
 }
