@@ -886,7 +886,7 @@ int main(int argc, char** argv) {
     //
     timeout = dtime() + 300;
     do {
-        pVM->poll(false);
+        pVM->poll(true);
         if (pVM->online && !pVM->restoring) break;
         boinc_sleep(1.0);
     } while (timeout >= dtime());
@@ -896,7 +896,7 @@ int main(int argc, char** argv) {
     pVM->lower_vm_process_priority();
 
     // Log our current state
-    pVM->poll(true);
+    //pVM->poll(true);
 
     // Is the VM still running? If not, why not?
     //

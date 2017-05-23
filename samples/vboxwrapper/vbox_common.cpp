@@ -121,7 +121,7 @@ VBOX_BASE::VBOX_BASE() : VBOX_JOB() {
     vm_pid = 0;
     vboxsvc_pid = 0;
    
-    p = 0;
+    log_pointer = 0;
     state = "PoweredOff";
 
 #ifdef _WIN32
@@ -194,7 +194,7 @@ int VBOX_BASE::run(bool do_restore_snapshot) {
     vm_name = vm_master_name;
 
     // Check to see if the VM is already in a running state, if so, poweroff.
-    poll(false);
+    //poll(false);
     if (online) {
         vboxlog_msg("VM was running");
         retval = poweroff();
@@ -285,20 +285,18 @@ void VBOX_BASE::dump_hypervisor_logs(bool include_error_logs) {
     }
 }
 
-void VBOX_BASE::get_guest_vm(){
-     string local_vm_log;
+void VBOX_BASE::read_vm_log(){
      string line;
      size_t line_pos;
      size_t line_end;
      size_t line_start;
-     VBOX_TIMESTAMP current_timestamp;
      string msg;
      string virtualbox_vm_log;
      virtualbox_vm_log = vm_master_name + "/Logs/VBox.log";
 
      std::ifstream  src(virtualbox_vm_log.c_str(), std::ios::binary);
 
-     if ((src.is_open()) && (src.seekg(p)))
+     if ((src.is_open()) && (src.seekg(log_pointer)))
      {
          while (std::getline(src, line))
          {
@@ -322,9 +320,11 @@ void VBOX_BASE::get_guest_vm(){
 		vboxlog_msg(msg.c_str());
 	     }
 	   
-	     p = src.tellg();
+	     log_pointer = src.tellg();
 	}
+	 return state.c_str();
     }
+     else return "Error in parsing the log file";
 }
 
 

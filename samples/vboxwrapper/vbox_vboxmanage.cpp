@@ -890,9 +890,9 @@ int VBOX_VM::poll(bool log_state) {
             vmstate = output.substr(vmstate_start, vmstate_end - vmstate_start);
     */
 
-    get_guest_vm();
-    vmstate = state;
+    vmstate = read_vm_log();
 
+    if (vmstate != "Error in parsing the log file") {
             // VirtualBox Documentation suggests that that a VM is running when its
             // machine state is between MachineState_FirstOnline and MachineState_LastOnline
             // which as of this writing is 5 and 17.
@@ -914,7 +914,13 @@ int VBOX_VM::poll(bool log_state) {
                 restoring = false;
                 suspended = true;
                 crashed = false;
-            } else if (vmstate == "Starting") {
+            } else if (vmstate == "Saved") {
+                online = false;
+                saving = false;
+                restoring = false;
+                suspended = true;
+                crashed = false;
+	    } else if (vmstate == "Starting") {
                 online = true;
                 saving = false;
                 restoring = false;
@@ -997,7 +1003,8 @@ int VBOX_VM::poll(bool log_state) {
     // Dump any new VM Guest Log entries
     //
     //dump_vmguestlog_entries();
-
+           
+    } else vboxlog_msg("Error in parsing the log file");
     return retval;
 }
 
@@ -1010,7 +1017,7 @@ int VBOX_VM::start() {
 
     boinc_get_init_data_p(&aid);
 
-
+    log_pointer = 0;
     vboxlog_msg("Starting VM using VboxManage interface. (%s, slot#%d)", vm_name.c_str(), aid.slot);
 
 
@@ -1063,7 +1070,7 @@ int VBOX_VM::stop() {
         if (!retval) {
             timeout = dtime() + 300;
             do {
-                poll(false);
+                //poll(false);
                 if (!online && !saving) break;
                 boinc_sleep(1.0);
             } while (timeout >= dtime());
@@ -1106,7 +1113,7 @@ int VBOX_VM::poweroff() {
         if (!retval) {
             timeout = dtime() + 300;
             do {
-                poll(false);
+                //poll(false);
                 if (!online && !saving) break;
                 boinc_sleep(1.0);
             } while (timeout >= dtime());

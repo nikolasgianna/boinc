@@ -153,7 +153,7 @@ public:
     int rd_host_port;
     bool headless;
    
-    std::streamoff p;
+    std::streamoff log_pointer;
     std:string state;
 
     int vm_pid;
@@ -187,7 +187,7 @@ public:
     virtual int cleanup_snapshots(bool delete_active) = 0;
     virtual int restore_snapshot() = 0;
 
-    virtual void get_guest_vm();
+    virtual std::string read_vm_log();
 
     virtual int run(bool do_restore_snapshot);
     virtual void cleanup();
