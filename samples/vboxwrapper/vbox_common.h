@@ -251,6 +251,17 @@ public:
     );
     static void vbm_replay(std::string& command);
     static void vbm_trace(std::string& command, std::string& ouput, int retval);
+
+    virtual std::string get_error(int choice);
+	
+    virtual void report_clean(bool unrecoverable_error, bool skip_cleanup, bool do_dump_hypervisor_logs, 
+		                      int retval, std::string error_reason,
+		                      int vm_pid, int temp_delay, const char*  temp_reason,
+		                      double current_cpu_time,
+		                      double last_checkpoint_cpu_time,
+		                      double fraction_done,
+	                              double bytes_sent,
+		                      double bytes_received);
 };
 
 class VBOX_VM : public VBOX_BASE {

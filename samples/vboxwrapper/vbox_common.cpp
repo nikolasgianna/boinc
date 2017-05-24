@@ -285,6 +285,124 @@ void VBOX_BASE::dump_hypervisor_logs(bool include_error_logs) {
     }
 }
 
+void VBOX_BASE::report_clean(bool unrecoverable_error, bool skip_cleanup, bool do_dump_hypervisor_logs,
+	                         int retval, std::string error_reason,
+	                         int vm_pid, int temp_delay, const char*  temp_reason,
+	                         double current_cpu_time,
+	                         double last_checkpoint_cpu_time,
+	                         double fraction_done,
+	                         double bytes_sent,
+	                         double bytes_received) {
+
+
+	if (unrecoverable_error) {
+
+		// Attempt to cleanup the VM and exit.
+		if (!skip_cleanup) {
+			cleanup();
+		}
+
+		if (error_reason.size()) {
+			vboxlog_msg("\n%s", error_reason.c_str());
+		}
+
+		if (do_dump_hypervisor_logs) {
+			dump_hypervisor_logs(true);
+		}
+
+		boinc_finish(retval);
+	}
+	else {
+
+		// if the VM is already running notify BOINC about the process ID so it can
+		// clean up the environment.  We should be safe to run after that.
+		//
+		if (vm_pid) {
+			retval = boinc_report_app_status_aux(
+				current_cpu_time,
+				last_checkpoint_cpu_time,
+				fraction_done,
+				vm_pid,
+				bytes_sent,
+				bytes_received
+				);
+		}
+
+		// Give the BOINC API time to report the pid to BOINC.
+		//
+		boinc_sleep(5.0);
+
+		if (error_reason.size()) {
+			vboxlog_msg("\n%s", error_reason.c_str());
+		}
+
+		if (do_dump_hypervisor_logs) {
+			dump_hypervisor_logs(true);
+		}
+
+		// Exit and let BOINC clean up the rest.
+		//
+		boinc_temporary_exit(temp_delay, temp_reason);
+	}
+}
+
+string VBOX_BASE::get_error(int num){
+
+	std::vector<std::string> v= { 
+		"   BOINC will be notified that it needs to clean up the environment.\n \
+		    This is a temporary problem and so this job will be rescheduled for another time.\n",
+		
+		"   NOTE: VM was already running.\n \
+		    BOINC will be notified that it needs to clean up the environment.\n \
+		    This might be a temporary problem and so this job will be rescheduled for another time.\n",
+		
+		"   NOTE: VirtualBox has reported an improperly configured virtual machine. It was configured to require\n \
+		    hardware acceleration for virtual machines, but your processor does not support the required feature.\n \
+		    Please report this issue to the project so that it can be addresssed.\n \
+		    Error Code: ERR_CPU_VM_EXTENSIONS_DISABLED\n",
+		
+		"   VboxSvc crashed while attempting to restore the current snapshot.  This is a critical\n \
+		    operation and this job cannot be recovered.\n",
+		
+		"   NOTE: VM session lock error encountered.\n \
+		    BOINC will be notified that it needs to clean up the environment.\n \
+		    This might be a temporary problem and so this job will be rescheduled for another time.\n",
+		
+		"   NOTE: BOINC has detected that your computer's processor supports hardware acceleration for\n \
+		    virtual machines but the hypervisor failed to successfully launch with this feature enabled.\n \
+		    This means that the hardware acceleration feature has been disabled in the computer's BIOS.\n \
+		    Please enable this feature in your computer's BIOS.\n \
+		    Intel calls it 'VT-x'\n \
+		    AMD calls it 'AMD-V'\n \
+		    More information can be found here: https://en.wikipedia.org/wiki/X86_virtualization\n \
+		    Error Code: ERR_CPU_VM_EXTENSIONS_DISABLED\n",
+		
+		"   NOTE: VirtualBox has reported an improperly configured virtual machine. It was configured to require\n \
+		    hardware acceleration for virtual machines, but your processor does not support the required feature.\n \
+		    Please report this issue to the project so that it can be addresssed.\n",
+		
+		"   NOTE: VirtualBox hypervisor reports that another hypervisor has locked the hardware acceleration\n \
+		    for virtual machines feature in exclusive mode.\n",
+		
+		"   NOTE: VirtualBox has failed to allocate enough memory to start the configured virtual machine.\n \
+		    This might be a temporary problem and so this job will be rescheduled for another time.\n",
+		
+		"   NOTE: VM failed to enter an online state within the timeout period.\n \
+		    This might be a temporary problem and so this job will be rescheduled for another time.\n",
+	
+		    "VM environment needed to be cleaned up.",
+       
+		    "Forign VM Hypervisor locked hardware acceleration features.",
+
+		    "VM Hypervisor was unable to allocate enough memory to start VM.",
+
+	     	"VM Hypervisor failed to enter an online state in a timely fashion."
+	};
+	
+	    return v[num];
+}
+
+
 void VBOX_BASE::read_vm_log(){
      string line;
      size_t line_pos;
