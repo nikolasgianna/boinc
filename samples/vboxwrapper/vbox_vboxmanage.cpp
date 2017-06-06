@@ -708,6 +708,18 @@ int VBOX_VM::deregister_vm(bool delete_media) {
         vbm_popen(command, output, "network throttle group (remove)", false, false);
     }
 
+    //
+    vboxlog_msg("Attempting to remove ghost medium.");
+    command = "storageattach \"" + vm_name + "\" ";
+    command += "--storagectl \"Hard Disk Controller\" ";
+    command += "--port 0 ";
+    command += "--device 0 ";
+    command += "--type hdd ";
+    command += "--medium none";
+
+    vbm_popen(command, output, "storage detach (fixed disk)");
+    //
+
     // Delete its storage controller(s)
     //
     vboxlog_msg("Removing storage controller(s) from VM.");
@@ -853,7 +865,7 @@ int VBOX_VM::poll(bool log_state) {
     string output;
     string::iterator iter;
     string vmstate;
-    static string vmstate_old = "poweroff";
+    static string vmstate_old = "PoweredOff";
     size_t vmstate_start;
     size_t vmstate_end;
 
