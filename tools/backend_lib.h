@@ -18,6 +18,14 @@
 #ifndef BOINC_BACKEND_LIB_H
 #define BOINC_BACKEND_LIB_H
 
+
+#define DEFAULT_FPOPS_EST 3600e9
+#define DEFAULT_FPOPS_BOUND 86400e9
+#define DEFAULT_MEMORY_BOUND 5e8 
+#define DEFAULT_DISK_BOUND 1e11
+#define DEFAULT_DELAY_BOUND 604800
+
+
 #include <limits.h>
 
 #include "crypt.h"
@@ -99,7 +107,12 @@ extern int create_work2(
     SCHED_CONFIG&,
     const char* command_line = NULL,
     const char* additional_xml = NULL,
-    char* query_string = 0
+    char* query_string = 0,
+    double rsc_fpops_est = -1,
+    double rsc_fpops_bound = -1,
+    double rsc_memory_bound = -1,
+    double rsc_disk_bound = -1,
+    double delay_bound = -1
 );
 
 extern int stage_file(const char*, bool);
